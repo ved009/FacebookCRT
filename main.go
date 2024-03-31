@@ -3,12 +3,18 @@ package main
 import (
     "encoding/json"
     "fmt"
+    "github.com/BurntSushi/toml"
     "io/ioutil"
     "net/http"
     "os"
 )
 
-// Define structures to unmarshal the JSON data.
+type Config struct {
+    Facebook struct {
+        AccessToken string `toml:"access_token"`
+    } `toml:"facebook"`
+}
+
 type CertificatesResponse struct {
     Data []struct {
         Domains []string `json:"domains"`
@@ -47,10 +53,23 @@ func main() {
         return
     }
 
+    homeDir, err := os.UserHomeDir()
+    if err != nil {
+        fmt.Println("Error fetching user home directory:", err)
+        return
+    }
+
+    configPath := homeDir + "/.Facebook.toml"
+
+    var conf Config
+    if _, err := toml.DecodeFile(configPath, &conf); err != nil {
+        fmt.Println("Error reading config file:", err)
+        return
+    }
+
+    accessToken := conf.Facebook.AccessToken
     queryDomain := os.Args[1]
-    accessToken := "Access Token Here" // Replace with your actual access token
-    baseurl := "https://graph.facebook.com/v19.0/certificates?access_token=%s&fields=domains&limit=5000&pretty=0&query=%s"
-    url := fmt.Sprintf(baseurl, accessToken, queryDomain)
+    url := fmt.Sprintf("https://graph.facebook.com/v19.0/certificates?access_token=%s&fields=domains&limit=5000&pretty=0&query=%s", accessToken, queryDomain)
 
     for {
         certs, err := fetchCertificates(url)
@@ -59,7 +78,6 @@ func main() {
             break
         }
 
-        // Process and print each domain on a new line
         for _, data := range certs.Data {
             for _, domain := range data.Domains {
                 fmt.Println(domain)
@@ -67,10 +85,10 @@ func main() {
         }
 
         if certs.Paging.Cursors.After == "" {
-            //fmt.Println("No more data available.")
             break
         }
 
+        // Prepare URL for the next page
         url = fmt.Sprintf("%s&after=%s", url, certs.Paging.Cursors.After)
     }
 }
