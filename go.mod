@@ -1,4 +1,4 @@
-module github.com/ved009/FacebookCRT.git
+module github.com/ved009/FacebookCRT
 
 go 1.21.3
 
