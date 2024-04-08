@@ -16,7 +16,10 @@ The API Token can be read from Home directory, the example toml file is added
 
 1. Implement Stdin
 2. Second Argument - Find, Track, ViewNew and All
-3. Filtering wildcards and hosts in output. 
+3. Filtering wildcards and hosts in output.
+4. Steps for creating the Developer Profile and creating the access token.
+5. Increasing the Timeout of AccessToken.
+6. Handling Rate Limits of API
 
 
 #Note
